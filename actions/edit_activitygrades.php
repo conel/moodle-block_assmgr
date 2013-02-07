@@ -9,7 +9,6 @@
  * @version 2.0
  */
 
-
 require_once('../../../config.php');
 
 global $USER, $CFG, $SESSION, $PARSER, $OUTPUT, $PAGE;
@@ -56,8 +55,8 @@ if($access_isassessor) {
         print_error('portfolionotincourse', 'block_assmgr');
     }
 }
-*/
-// get the candidate, course and category
+
+// ge*t the candidate, course and category
 $candidate 		= $dbc->get_user($candidate_id);
 $course 		= $dbc->get_course($course_id);
 $coursecat 		= $dbc->get_category($course->category);
