@@ -102,7 +102,8 @@ $PAGE->navbar->add(get_string('blockname', 'block_assmgr'),null,'title');
 if($access_isassessor) {
     // assessor breadcrumbs
 	$PAGE->navbar->add($coursecat->name,$CFG->wwwroot."/blocks/assmgr/actions/list_portfolio_assessments.php?category_id={$coursecat->id}",'title');
-	$PAGE->navbar->add($course->shortname,$CFG->wwwroot."/blocks/assmgr/actions/list_portfolio_assessments.php?course_id={$course->id}",'title');
+	//$PAGE->navbar->add($course->shortname,$CFG->wwwroot."/blocks/assmgr/actions/list_portfolio_assessments.php?course_id={$course->id}",'title');
+	$PAGE->navbar->add($course->shortname,$CFG->wwwroot."/course/view.php?id={$course->id}",'title');
 	$PAGE->navbar->add(fullname($candidate),null,'title');
 
 } else {

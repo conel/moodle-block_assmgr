@@ -70,7 +70,8 @@ $PAGE->navbar->add(get_string('blockname', 'block_assmgr'),null,'title');
 if(!empty($course)) {
     // category and course breadcrumbs
     $PAGE->navbar->add($category->name,$CFG->wwwroot."/blocks/assmgr/actions/list_portfolio_assessments.php?category_id={$category->id}",'title');
-	$PAGE->navbar->add($course->shortname,$CFG->wwwroot."/blocks/assmgr/actions/list_portfolio_assessments.php?course_id={$course->id}",'title');
+	//$PAGE->navbar->add($course->shortname,$CFG->wwwroot."/blocks/assmgr/actions/list_portfolio_assessments.php?course_id={$course->id}",'title');
+	$PAGE->navbar->add($course->shortname,$CFG->wwwroot."/course/view.php?id={$course->id}",'title');
 } elseif(empty($category_id)) {
     // no category breadcrumbs
     $PAGE->navbar->add(get_string('allmyqualifications', 'block_assmgr'),null,"title");
