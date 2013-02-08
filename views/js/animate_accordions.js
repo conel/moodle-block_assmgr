@@ -30,9 +30,9 @@ M.blocks_assmgr_animate_accordions = {
     	this.open_image = open_image;
 		this.closed_image = closed_image;
 
-		console.log(open_image);
+		//console.log(open_image);
 		
-		console.log(closed_image);
+		//console.log(closed_image);
 		
 		var heights = new Array();
 
@@ -42,7 +42,7 @@ M.blocks_assmgr_animate_accordions = {
 		// get the currently selected accordion
 		var current = new RegExp("#(.+)").exec(window.location.href);
 
-		console.log(current);
+		//console.log(current);
 		
 		for(i=0; i<headers.length; i++) {
 			

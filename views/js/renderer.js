@@ -35,7 +35,7 @@ jQuery(document).ready(function() {
         //fixedColumnhovercolor:"#99CCFF"  
     });
 
-    console.log(jQuery('new_activitynametable').offsetHeight);
+    //console.log(jQuery('new_activitynametable').offsetHeight);
 });
 
 M.render_assmgr_course_activities = {};

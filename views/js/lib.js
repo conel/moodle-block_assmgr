@@ -97,7 +97,7 @@ function suppressClick(e) {
  */
 function get_height(elem) {
 	
-	console.log(elem);
+	//console.log(elem);
 	
 	// work out the height of the rendered element minus the extra bits 
 	var padding = parseFloat(Dom.getStyle(elem, "padding-top")) + parseFloat(Dom.getStyle(elem, "padding-bottom"));
@@ -135,9 +135,9 @@ function toggle_container(elem, from, to) {
 	
 	var jconheight	=	jQuery(container).height();
 	
-	console.log('container ');
-	console.log(containerheight);
-	console.log(jconheight);
+	//console.log('container ');
+	//console.log(containerheight);
+	//console.log(jconheight);
 	
 	if(to == 0) {
 		
@@ -467,7 +467,7 @@ function set_col(col,gradecelloffset) {
     col += gradecelloffset;
 
     for (var row = 3; row < table.rows.length; row++) {
-    	console.log('row '+row+' col'+col);
+    	//console.log('row '+row+' col'+col);
     	
         flip_vmarked(table,row,col);
     }
