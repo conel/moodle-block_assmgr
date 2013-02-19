@@ -15,11 +15,7 @@ if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');
 }
 
-
 global $OUTPUT, $CFG, $PAGE;
-
-
-
 
 require_once($CFG->dirroot.'/blocks/assmgr/classes/assmgr_course_activities.class.php');
 
@@ -33,10 +29,7 @@ $courseactiviites->is_assessor	=	(isset($access_isassessor)) ? $access_isassesso
 $activities 		=	$courseactiviites->get_course_activities();
 $outcomes 			=	$courseactiviites->get_course_outcomes();
 
-
-
-
-
 // render the table
 require_once($CFG->dirroot.'/blocks/assmgr/views/view_submissions.html');
+
 ?>

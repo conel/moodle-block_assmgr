@@ -38,17 +38,14 @@ class block_assmgr_renderer extends plugin_renderer_base {
 		$outcomes 				=		$courseactivities->get_course_outcomes();
 		
 		if (!empty($activities)) {
-			
-
-			
+						
 			$out	=	html_writer::start_tag('div',array('id'=>'assessdiv','class'=>'fixedtableclass'));
 			
 			if (!empty($is_assessor)) {
 				//create a form to wrap the table in this will allow us to save the outcome values
 				$out					.=		html_writer::start_tag('form', array('id' => 'outassessform',
 																					 'method' => 'post',
-																					 'action' => 'save_outcomes_assessment.php',));
-				
+																					 'action' => 'save_outcomes_assessment.php',));				
 				//
 				$out					.=		html_writer::start_tag('input', array('type'=>'hidden','name'=>'course_id','value'=>$courseactivities->course_id));
 				$out					.=		html_writer::start_tag('input', array('type'=>'hidden','name'=>'candidate_id','value'=>$courseactivities->candidate_id));
@@ -67,13 +64,12 @@ class block_assmgr_renderer extends plugin_renderer_base {
 			$table->head['grade']->text			=       get_string('grade','block_assmgr');
 			
 			foreach($outcomes	as $o) {
-				$table->head[$o->id]					= 		new html_table_cell();
+				$table->head[$o->id]					= 	new html_table_cell();
 				
-				$currentgradeitem_id					=	$courseactivities->get_candidate_course_outcome_grade($o->id);
+				$currentgradeitem_id					=	$courseactivities->get_candidate_course_outcome_grade($o->id);				
 				$table->head[$o->id]->text				=   limit_length($o->shortname, 20, $o->fullname)." ".$this->get_outcome_header($o->id,$currentgradeitem_id,$is_assessor);//
 			}
-			
-			
+						
 			//create table body content
 			$table->data 						=		array();
 	
@@ -90,10 +86,7 @@ class block_assmgr_renderer extends plugin_renderer_base {
 	            } else {
 	                $row->cells['activityname']->text	=       limit_length($a->name, 20, $a->name);
 	            }
-	            
-	            
-	            
-	            
+	           	            
 	            $row->cells['grade']				= 		new html_table_cell();
 	            $grade	=	$courseactivities->get_candidate_activity_grade($a->cminstance,$a->modulename);
 	            $row->cells['grade']->text			=       (!empty($grade)) ? $grade : "" ;
@@ -129,9 +122,7 @@ class block_assmgr_renderer extends plugin_renderer_base {
 			$out	=	html_writer::start_tag('div',array('id'=>'nothingtodisplay'));
 			$out	.=	get_string('nothingtodisplay');
 			$out	.=		html_writer::end_tag('div');
-			
-			
-			
+						
 			/*
 			$jsmodule = array(
     			'name'     	=> 'view_submissions',
@@ -143,8 +134,6 @@ class block_assmgr_renderer extends plugin_renderer_base {
 			//$PAGE->requires->js_init_call('M.assmgr.view_submissions.init()', null, true, $jsmodule);
 			*/
 		}
-		
-		
 		
 		return $out;
 	}
@@ -172,7 +161,7 @@ class block_assmgr_renderer extends plugin_renderer_base {
         
 		//check if the user is an assessor
         if (!empty($isassessor)) {
-            
+                        
             // get the grade value
             //$item_id = (!empty($this->grades[$id])) ? $this->grades[$id]->scale_item : null;
 
@@ -182,7 +171,7 @@ class block_assmgr_renderer extends plugin_renderer_base {
                         <div id="outcomediv'.$outcome->id.'" class="assmgroutcomediv">
 
                              <span class="columngrade hidden" id ="columngrade'.$outcome->id.'">'
-                                .$scale->render_scale_item($currentgradeitem_id)
+                                . $scale->render_scale_item($currentgradeitem_id)
                            .'</span>
                              <span class="columnselect" id ="columnselect'.$outcome->id.'">'
                                 .$scale->get_select_element($currentgradeitem_id, array('onclick'=>'suppressClick(event);', 'name'=>"outcomes[{$outcome->id}]", 'id' => 'columnselect'.$outcome->id.'select'))
@@ -199,13 +188,8 @@ class block_assmgr_renderer extends plugin_renderer_base {
                     return '<br/><div class="hiddenoutcomegrade">'.$scale->render_scale_item($currentgradeitem_id).'</div>';
          }
 
-
         return null;
-    }
-	
-	
-	
+    }	
 }
-
 
 ?>

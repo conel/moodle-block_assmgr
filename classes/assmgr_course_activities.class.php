@@ -103,17 +103,22 @@ class assmgr_course_activities implements renderable	{
 	 *  @return	mixed object containing grade data or false
 	 */
 	function get_candidate_course_outcome_grade($outcome_id)	{
-		$grades	=	 grade_get_grades($this->course_id,'outcome',NULL,$outcome_id,$this->candidate_id);
+		 
+		global $DB;
 
+		$item = $DB->get_record_select('grade_items', "courseid = '".$this->course_id."' AND itemnumber = '$outcome_id'", null, 'id');	
+		
+		$grades = $DB->get_record_select('grade_grades', "itemid = '".$item->id."'", null, 'finalgrade');			
+					       	
        	if (!empty($grades)) {
-           	$grades		=	array_pop($grades->items);
-           	$grade = !empty($grades->grades[$this->candidate_id]->grade) ? $grades->grades[$this->candidate_id]->grade : null;
+           	$grade		=	$grades->finalgrade;
        	} else {
        		$grade	=	null;
        	}
+       	
 		return $grade;
 	}
-	
+		
 	/**
 	 * Returns the grade for a particular outcomes for the 
 	 * 

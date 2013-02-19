@@ -14,7 +14,7 @@
 
 require_once('../../../config.php');
 
-global $USER, $CFG, $PARSER, $PAGE;
+global $USER, $CFG, $PARSER, $PAGE, $DB;
 
 
 // Meta includes
@@ -48,6 +48,7 @@ $formid    = $PARSER->optional_param('formid', 'error', PARAM_ALPHA);
 
 $dbc = new assmgr_db();
 $return_message = '';
+
 // process the portfolio outcomes
 if(!empty($outcomes)) {
 
@@ -55,14 +56,13 @@ if(!empty($outcomes)) {
 
     // step through each outcome the portfolio achieved
     foreach ($outcomes as $outcome_id => $grade) {
-
+		
         $outcome	=	$dbc->get_outcome($outcome_id);
-
+		
         //as the grades name is the only real link back to outcome provided by (the data returned from) grade_get_grades function we need
         //to query the grade_items table to retrieve the itemnumber of the outcome for this activity (if it exists)
         //we can then use this information to get the grade from the data grade_get_grades returns
         $outcome_grade_item		=	$dbc->get_overall_course_outcome($course_id,$outcome_id);
-
 
         /*
                 if (empty($outcome_grade_item))	{
@@ -90,16 +90,26 @@ if(!empty($outcomes)) {
 
                 }
         */
+        
         $outcomegrade				=	new stdClass();
         $outcomegrade->userid		=	$candidate_id;
         $outcomegrade->rawgrade		=	$grade;
-
+		        
         //($source, $courseid, $itemtype, $itemmodule, $iteminstance, $itemnumber, $grades=NULL, $itemdetails=NULL)
-        assmgr_grade_update('outcome',$course_id,"outcome",NULL,$outcome_id,NULL,$outcomegrade,array('itemname'=>$outcome->shortname));
+        				
+		$record = $DB->get_record_select('grade_items', "courseid = '$course_id' AND itemnumber = '$outcome_id'", null, 'id');			
+		
+		if(!empty($record)) {
+			if($grade == 0) $grade = null;
+			$DB->set_field('grade_grades', 'finalgrade', $grade, array('itemid' => $record->id));
+		} else {
+			assmgr_grade_update('outcome',$course_id,"outcome",NULL,$outcome_id,NULL,$outcomegrade,array('itemname'=>$outcome->shortname));
+		}
+		
         // check if the outcome was awarded an actual grade
 
     }
-
+		
     $course = $dbc->get_course($course_id);
     $candidate = $dbc->get_user($candidate_id);
 
@@ -108,24 +118,28 @@ if(!empty($outcomes)) {
 if ($ajax) {
 
     // TODO - same on success and failure. needs error
+	foreach ($outcomes as $outcome_id => $outcomescaleitem) {
+		
+		$outcome = $dbc->get_outcomes($course_id, $outcome_id);
+		$scale = $dbc->get_scale($outcome->scaleid, $outcome->gradepass);
 
-    foreach ($outcomes as $outcome_id => $outcomescaleitem) {
-        $outcome = $dbc->get_outcomes($course_id, $outcome_id);
-        $scale = $dbc->get_scale($outcome->scaleid, $outcome->gradepass);
-
-        $grades		=	grade_get_grades($course_id, 'outcome', NULL, $outcome_id,$candidate_id);
-
-        if (!empty($grades)) {
-            $grades		=	array_pop($grades->items);
-            $scale_item = !empty($grades->grades[$candidate_id]->grade) ? $grades->grades[$candidate_id]->grade : null;
-        } else {
-            $scale_item	=	null;
-        }
-        echo $scale->render_scale_item($scale_item);
-    }
-
-
+		//$grades		=	grade_get_grades($course_id, 'outcome', NULL, $outcome_id,$candidate_id);
+		$grades = $DB->get_record_select('grade_items', "courseid = '$course_id' AND itemnumber = '$outcome_id'", null, 'id');	
+		
+		if (!empty($grades)) {
+			//$grades		=	array_pop($grades->items);
+			//$scale_item = !empty($grades->grades[$candidate_id]->grade) ? $grades->grades[$candidate_id]->grade : null;
+			$scales = $DB->get_record_select('grade_grades', "itemid = '".$grades->id."'", null, 'finalgrade');	
+			$scale_item = $scales->finalgrade; 								
+		} else {
+			$scale_item	=	null;
+		}
+		
+		echo $scale->render_scale_item($scale_item);
+	}
+		
 } else {
     redirect("{$CFG->wwwroot}/blocks/assmgr/actions/edit_portfolio.php?course_id={$course_id}&candidate_id={$candidate_id}#submittedevidence", $return_message, REDIRECT_DELAY);
 }
+
 ?>
