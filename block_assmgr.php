@@ -92,7 +92,10 @@ class block_assmgr extends block_list {
         if($access_isassessor) {
             $label = get_string('assessportfolios', 'block_assmgr');
             $courseurl = ($course_id == $SITE->id) ? '' : "&amp;course_id={$course_id}";
-            $url = "{$CFG->wwwroot}/blocks/assmgr/actions/list_portfolio_assessments.php?category_id={$course->category}{$courseurl}";
+            
+            //$url = "{$CFG->wwwroot}/blocks/assmgr/actions/list_portfolio_assessments.php?category_id={$course->category}{$courseurl}";
+            $url = "{$CFG->wwwroot}/grade/report/grader/portfolios.php?id={$course_id}";
+            
             $this->content->items[] = "<a href='{$url}'>{$label}</a>";
             $this->content->icons[] = "<img src='{$CFG->wwwroot}/blocks/assmgr/pix/icon.gif' class='icon' alt='".get_string('assmgricon', 'block_assmgr')."' title='{$label}' />";
         }
