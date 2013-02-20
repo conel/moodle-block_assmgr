@@ -101,7 +101,7 @@ if(!empty($outcomes)) {
 		
 		if(!empty($record)) {
 			if($grade == 0) $grade = null;
-			$DB->set_field('grade_grades', 'finalgrade', $grade, array('itemid' => $record->id));
+			$DB->set_field('grade_grades', 'finalgrade', $grade, array('itemid' => $record->id, 'userid' => $candidate_id));
 		} else {
 			assmgr_grade_update('outcome',$course_id,"outcome",NULL,$outcome_id,NULL,$outcomegrade,array('itemname'=>$outcome->shortname));
 		}
@@ -129,7 +129,7 @@ if ($ajax) {
 		if (!empty($grades)) {
 			//$grades		=	array_pop($grades->items);
 			//$scale_item = !empty($grades->grades[$candidate_id]->grade) ? $grades->grades[$candidate_id]->grade : null;
-			$scales = $DB->get_record_select('grade_grades', "itemid = '".$grades->id."'", null, 'finalgrade');	
+			$scales = $DB->get_record_select('grade_grades', "itemid = '".$grades->id."' AND userid='".$candidate_id."'", null, 'finalgrade');	
 			$scale_item = $scales->finalgrade; 								
 		} else {
 			$scale_item	=	null;

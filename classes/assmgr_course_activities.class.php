@@ -108,7 +108,7 @@ class assmgr_course_activities implements renderable	{
 
 		$item = $DB->get_record_select('grade_items', "courseid = '".$this->course_id."' AND itemnumber = '$outcome_id'", null, 'id');	
 		
-		$grades = $DB->get_record_select('grade_grades', "itemid = '".$item->id."'", null, 'finalgrade');			
+		$grades = $DB->get_record_select('grade_grades', "itemid = '".$item->id."' AND userid='".$this->candidate_id."'", null, 'finalgrade');			
 					       	
        	if (!empty($grades)) {
            	$grade		=	$grades->finalgrade;

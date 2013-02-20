@@ -411,6 +411,32 @@ class assmgr_db_functions extends assmgr_logging {
         return $this->dbc->get_field_sql($sql);
     }
 
+    /**
+     * Count of outcomes for calculating the progress bar
+     * This is a modified version of the count_outcomes function
+     * called from the assmgr_progress_bar class get_unit_progress
+     * method
+     * 
+     * @param array $courselist
+     * @return array count of courses that matches given outcomes
+     */
+    function count_block_assmgr_outcomes($courselist) {
+
+        if(empty($courselist)) {
+            return false;
+        }
+
+        $courselist = implode(',', $courselist);
+
+        $sql = "SELECT COUNT(id)
+                  FROM {grade_items}
+                 WHERE courseid IN ({$courselist})
+                  AND  itemtype	= 'outcome'
+                  AND  itemmodule = 'block_assmgr'";
+
+        return $this->dbc->get_field_sql($sql);
+    }
+
     function get_verification_outcomes($category_id,$course_id,$assessor_id) {
         //TODO work out sql for if an assessor is chosen
 
@@ -2947,9 +2973,44 @@ $select = "SELECT MIN(logtable.timecreated) AS timecreated
                        AND gg.finalgrade IS NOT NULL
                        AND gg.userid = {$candidate_id}
                 ) AS progress";
-        
+                
         return $this->dbc->get_field_sql($sql);
     }
+
+    /**
+     * Returns the progress of a candidate for calculating the progress bar
+     * This is a modified version of the get_candidate_progress function
+     * called from the assmgr_progress_bar class get_unit_progress
+     * method
+     *
+     * @param int $candidate_id The canidate id
+     * @param array $courselist The courses to include
+     * @return array result objects
+     */
+    function get_candidate_assmgr_progress($candidate_id, $courselist) {
+
+        // no candidates
+        if(empty($courselist)) {
+            return false;
+        }
+
+        $courselist = implode(',', $courselist);
+
+        $sql = "SELECT SUM(progress) AS progress
+                  FROM (
+                    # get the achieved and incomplete grades (weighted for sorting)
+                    SELECT SUM(IF(finalgrade < gradepass, 100, 10000)) AS progress
+                      FROM {grade_items} AS gi,
+                           {grade_grades} AS gg
+                     WHERE gi.itemmodule='block_assmgr'
+                       AND gi.courseid IN ({$courselist})
+                       AND gi.id = gg.itemid
+                       AND gg.finalgrade IS NOT NULL
+                       AND gg.userid = {$candidate_id}
+                ) AS progress";
+        
+        return $this->dbc->get_field_sql($sql);
+    }    
 
     /**
      * Returns a matrix with the assessment dates for a particular student, course or group.

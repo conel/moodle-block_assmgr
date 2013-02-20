@@ -47,11 +47,12 @@ class assmgr_progress_bar {
             : get_string('youhave', 'block_assmgr');
 
         // get the number of outcomes
-        $numoutcomes = $this->dbc->count_outcomes(array($course_id));
+        $numoutcomes = $this->dbc->count_block_assmgr_outcomes(array($course_id));
         
         if($score === false) {
             // get the candidate's progress score
-            $score = $this->dbc->get_candidate_progress($candidate_id, array($course_id));
+            //$score = $this->dbc->get_candidate_progress($candidate_id, array($course_id));
+            $score = $this->dbc->get_candidate_assmgr_progress($candidate_id, array($course_id));
         }
         
         // calculate the various percentages
