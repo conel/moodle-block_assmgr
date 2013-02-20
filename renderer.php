@@ -79,13 +79,29 @@ class block_assmgr_renderer extends plugin_renderer_base {
 	            $row = new html_table_row();
 	            $row->cells['activityname']			= 		new html_table_cell();
 	            
-	            if ($is_assessor)	{
-	            	$editlink	=	$courseactivities->get_edit_activity_link($a->cm_id,$a->cminstance);
-	            	$row->cells['activityname']->text	=       limit_length($a->name, 20, $a->name)." {$editlink}" ;
-	            	
-	            } else {
-	                $row->cells['activityname']->text	=       limit_length($a->name, 20, $a->name);
-	            }
+	            $aname = limit_length($a->name, 20, $a->name);	          
+				
+				switch ($a->modulename) {
+					case 'assignment':
+						$aname = "<a href='/mod/assignment/view.php?id=".$a->cm_id."' target='_blank'>$aname</a>";
+						break;
+					case 'assign':
+						$aname = "<a href='/mod/assign/view.php?id=".$a->cm_id."' target='_blank'>$aname</a>";
+						break;
+					case 'quiz':
+						$aname = "<a href='/mod/quiz/report.php?id=".$a->cm_id."' target='_blank'>$aname</a>";
+						break;
+					case 'scorm':
+						$aname = "<a href='/mod/scorm/report.php?id=".$a->cm_id."' target='_blank'>$aname</a>";
+						break;
+				}
+	            
+	            $row->cells['activityname']->text = $aname;
+
+	            if ($is_assessor) {
+					$editlink =	$courseactivities->get_edit_activity_link($a->cm_id,$a->cminstance);					
+					$row->cells['activityname']->text = $aname." {$editlink}" ;	            	
+				}
 	           	            
 	            $row->cells['grade']				= 		new html_table_cell();
 	            $grade	=	$courseactivities->get_candidate_activity_grade($a->cminstance,$a->modulename);
