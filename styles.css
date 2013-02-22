@@ -559,6 +559,10 @@ assmgr .gradetext {
     filter              : alpha(opacity=20);
 }
 
+#assmgr_assessments_container {
+	overflow-x: auto;
+}
+
 .assmgr #assmgr_assessments_container .mform {
     margin              :0;
 }

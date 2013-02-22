@@ -19,7 +19,7 @@ while (($collapsed = preg_replace('|/[^/]+/\.\./|','/',$path_to_config,1)) !== $
 }
 require_once('../../../config.php');
 
-global $USER, $CFG, $PARSER, $OUTPUT;
+global $USER, $CFG, $PARSER, $OUTPUT, $DB;
 
 //include the moodle library
 require_once($CFG->dirroot.'/lib/moodlelib.php');
@@ -126,11 +126,6 @@ if(!empty($course_id)) {
 // check to see if groups are being used in this course
 $group_id = groups_get_course_group($groupcourse, true);
 
-/*
-print "access_isassessor";
-print_object($access_isassessor);
-*/
-
 if(!$access_isassessor) {
     print_error('nopageaccess', 'block_assmgr');
 }
@@ -138,7 +133,7 @@ if(!$access_isassessor) {
 // get the unique list of categories from that course list
 $categories = array();
 foreach($allowedcourses as $allowedcourse) {
-    if(empty($categories[$allowedcourse->category])) {
+	if($allowedcourse->category>0){
         $categories[$allowedcourse->category] = $dbc->get_category_by_course($allowedcourse->id);
         $categories[$allowedcourse->category]->course_id = $allowedcourse->id;
     }
@@ -149,8 +144,6 @@ foreach($allowedcourses as $allowedcourse) {
 // within those courses
 $courselist = array();
 $candidatelist = array();
-
-
 
 if(!empty($allowedcourses)) {
     foreach($allowedcourses as $allowedcourse) {
@@ -210,29 +203,35 @@ foreach(array_keys($courses) as $id) {
     $columns[] = 'course'.$id;
 }
 
-
-
+$columns[] = "total_credit";
+$columns[] = "predicted_grade";
+			
 // determine how long each course name can be based on how many columns there are
 $maxlength = ($flextable->hozcols > 1) ? (100 / $flextable->hozcols) : 100;
 
 $headers = array('');
 foreach($courses as $courseobj) {
-    $headers[] = limit_length($courseobj->shortname, $maxlength, $courseobj->fullname);
+    //$headers[] = limit_length($courseobj->shortname, $maxlength, $courseobj->fullname);
+    $headers[] = "<a href='/grade/report/grader/portfolios.php?id=".$courseobj->id."'>".limit_length($courseobj->shortname, $maxlength, $course_title)."</a>";
 }
 
+$headers[] = "Total credits";
+$headers[] = "Predicted grades";
+			
 $flextable->define_columns($columns);
 $flextable->define_headers($headers);
 
 
 // make the table sortable
 $flextable->sortable(true, 'lastname', 'DESC');
-$flextable->initialbars(true);
+$flextable->initialbars(false);
 
 // MODIFY THIS
 $flextable->set_attribute('summary', get_string('listportfolios', 'block_assmgr'));
 
 $flextable->set_attribute('cellspacing', '0');
-$flextable->set_attribute('class', 'generaltable fit');
+//$flextable->set_attribute('class', 'generaltable fit');
+$flextable->set_attribute('class', 'fit');
 
 $flextable->setup();
 
@@ -242,58 +241,101 @@ $matrix = $dbc->get_portfolio_matrix($candidatelist, $courses, $flextable, $grou
 // instantiate the progress_bar
 $progress = new assmgr_progress_bar();
 
+if(!empty($category)) {
+	$course_select = $DB->get_records('course', array('category'=>(int)$category->id,'visible'=>1),'fullname');
+} else {
+	$course_select = $DB->get_records('course', array('visible'=>1),'fullname');
+}
+	
 // TODO this needs a view
-if(!empty($categories)) { ?>
-    <form id="switch_category" action="<?php echo $flextable->baseurl;?>" method="get" class="mform">
-        <div class="fitem">
-            <div class="fitemtitle">
-                <label for="switch_category_id">
-                    <?php echo get_string('qualification', 'block_assmgr'); ?>
-                </label>
-            </div>
-            <div class="felement fselect">
-                <select name="category_id" id="switch_category_id" onchange="document.getElementById('switch_category').submit();">
-                    <option value="0"><?php echo get_string('allmyqualifications', 'block_assmgr'); ?></option>
-                    <?php
-                    foreach ($categories as $q) {
-                        $selected = ($q->id == $category_id) ? 'selected="selected"' : ''; ?>
-                        <option value="<?php echo $q->id; ?>" <?php echo $selected; ?>>
-                            <?php echo $q->name; ?>
-                        </option>
-                        <?php
-                    } ?>
-                </select>
-            </div>
-        </div>
-    </form>
-    <form id="switch_course" action="<?php echo $flextable->baseurl;?>" method="get" class="mform">
-        <div class="fitem">
-            <div class="fitemtitle">
-                <label for="switch_course_id">
-                    <?php echo get_string('course', 'block_assmgr'); ?>
-                </label>
-            </div>
-            <div class="felement fselect">
-                <input type="hidden" name="category_id" value="<?php echo $category_id; ?>" />
-                <select name="course_id" id="switch_course_id" onchange="document.getElementById('switch_course').submit();">
-                    <option value="0"><?php echo get_string('allmycourses', 'block_assmgr'); ?></option>
-                    <?php
-                    foreach ($courselist as $c) {
-                        $selected = ($c->id == $course_id) ? 'selected="selected"' : ''; ?>
-                        <option value="<?php echo $c->id; ?>" <?php echo $selected; ?>>
-                            <?php echo $c->fullname; ?>
-                        </option>
-                        <?php
-                    } ?>
-                </select>
-            </div>
-        </div>
-    </form>
+if(!empty($categories)) { 
+	
+	$sql = "select id,name
+			from course_categories
+			where parent=0";
+	$rootCategories = $DB->get_records('course_categories', array('parent'=>0),'', 'id,name');
+	
+	$categSelect = array();
+	
+	foreach ($categories as $categ){
+		$path = explode('/', $categ->path);
+		$categ->rootId = $path[1];
+		$rootName = $rootCategories[$categ->rootId]->name;
+		$categSelect[$rootName][$categ->name] = $categ;
+	}	
+
+?>
+	<form id="switch_category" action="<?php echo $flextable->baseurl;?>" method="get" class="mform">
+		<div class="fitem">
+			<div class="fitemtitle">
+				<label for="switch_category_id">
+					<?php echo get_string('qualification', 'block_assmgr'); ?>
+				</label>
+			</div>
+			<div class="felement fselect">
+				<select name="category_id" id="switch_category_id" onchange="document.getElementById('switch_category').submit();">
+					<option value="0"><?php echo get_string('allmyqualifications', 'block_assmgr'); ?></option>
+						<?php
+						foreach($categSelect as $direct => $categ) {
+							echo "<optgroup label='$direct'>";
+							ksort($categ, SORT_STRING);
+							foreach ($categ as $q) {
+								$selected = ($q->id == $category_id) ? 'selected="selected"' : ''; ?>
+								<option value="<?php echo $q->id; ?>" <?php echo $selected; ?>>
+									<?php echo $q->name; ?>
+								</option><?php
+							} 
+							echo "</optgroup>";						
+						}
+					?>
+				</select>
+			</div>
+		</div>
+	</form>
+
+	<form id="switch_course" action="/grade/report/grader/portfolios.php?plugin=grader" method="get" class="mform">
+		<div class="fitem">
+			<div class="fitemtitle">
+				<label for="switch_course_id">
+					<?php echo get_string('course', 'block_assmgr'); ?>
+				</label>
+			</div>
+			<div class="felement fselect">
+				<!--input type="hidden" name="category_id" value="<?php echo $category_id; ?>" /-->
+				<!--select name="course_id" id="switch_course_id" onchange="document.getElementById('switch_course').submit();"-->
+				<select name="id" id="id" onchange="document.getElementById('switch_course').submit();">
+					<option value="0"><?php echo get_string('allmycourses', 'block_assmgr'); ?></option>
+					<?php
+					foreach ($course_select as $g) {
+						if($g->id == 1) continue;										
+						$selected = ($g->id == $subcategory_id) ? 'selected="selected"' : ''; ?>
+						<option value="<?php echo $g->id; ?>" <?php echo $selected; ?>>
+							<?php echo $g->fullname; ?>
+						</option>
+						<?php
+					} ?>
+				</select>
+			</div>
+		</div>
+	</form>
     <?php
 }
 
 // print the group selector
-groups_print_course_menu($groupcourse, $flextable->baseurl);
+//groups_print_course_menu($groupcourse, $flextable->baseurl);
+
+/*
+ * NO TARGETS TABLE
+ * the ones are listed here in 1.9: https://vle.conel.ac.uk/admin/block.php?block=35
+ *
+$rtargets = $DB->get_records('targets',null,'','id');	
+$targets = '';
+foreach($rtargets as $target) {
+	$targets .= "<option value='".$target->id."'>".$target->name."</option>";
+}
+ * 
+ * 
+*/
 
 if(!empty($matrix)) {
     foreach($matrix as $candidate) {
@@ -326,26 +368,44 @@ if(!empty($matrix)) {
 
                 // get the portfolio grade
                 $portgrade = $dbc->get_portfolio_grade($courseobj->id, $candidate->candidate_id);
+                
                 $finalgrade = !empty($portgrade->grade) ? $portgrade->str_grade : '';
 
                 // make a link to edit the portfolio
                 $linkstr = get_string('assess', 'block_assmgr');
-                $link = "<a href='edit_portfolio.php?course_id={$id}&amp;candidate_id={$candidate->candidate_id}#submittedevidence'>{$linkstr}</a>";
+                $link = ''; //"<a href='edit_portfolio.php?course_id={$id}&amp;candidate_id={$candidate->candidate_id}#submittedevidence'>{$linkstr}</a>";
 
                 $eventstr = get_string('setdate', 'block_assmgr');
+                
                 $eventlink = "<a href='list_assess_dates.php?course_id={$id}&amp;candidate_id={$candidate->candidate_id}&amp;group_id={$group_id}'>".get_string('setdate', 'block_assmgr')."</a>";
 
                 $gradestr = (!empty($finalgrade)) ? get_string('grade','block_assmgr').':'.$finalgrade : '';
 
                 $cell = $progbar.' '.$link.' ';
 
-                $cell = (!empty($gradestr)) ? $cell.' | '.$gradestr : $cell;
+                //$cell = (!empty($gradestr)) ? $cell.' | '.$gradestr : $cell;
+                $cell = (!empty($gradestr)) ? $cell . $gradestr : $cell;
 
                 $highlight =  null;
             }
 
             $data['course'.$id] = "<div class='progress_bar_cell {$highlight}'>{$cell}</div>";
         }
+
+		$qoutcome = false; //get_record('qualification_outcomes','category_id',$category_id,'candidate_id',$candidate->candidate_id);
+		
+		if($qoutcome==false) {
+			$qoutcome = new Object();
+			$qoutcome->total_credit = 0;
+			$qoutcome->predicted_grade = 0;						
+		}
+		
+		$trgts = ''; //$targets;
+		//$trgts = str_replace("<option value='".$qoutcome->predicted_grade."'>","<option value='".$qoutcome->predicted_grade."' selected='selected'>",$trgts);
+					
+		$data['total_credit'] = "<input type='text' name='total_credit[".$candidate->candidate_id."]' value='".$qoutcome->total_credit."' style='text-align:right' />";
+		$data['predicted_grade'] = "<select name='predicted_grade[".$candidate->candidate_id."]'>".$trgts."</select>";
+					               
         $flextable->add_data_keyed($data);
     }
 }
