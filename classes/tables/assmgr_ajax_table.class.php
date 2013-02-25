@@ -52,6 +52,8 @@ class assmgr_ajax_table extends flexible_table {
     // language token for nothing to display
     var $nothing        = 'nothingtodisplay';
 
+    var $category_id;
+
     /**
      * Constructor
      * @param int $uniqueid The id of the table div
@@ -518,6 +520,12 @@ class assmgr_ajax_table extends flexible_table {
             if(in_array(TABLE_P_BOTTOM, $this->showdownloadbuttonsat)) {
                 echo $this->download_buttons();
             }
+
+			echo '<input type="hidden" name="category_id" value="'.$this->category_id.'">';
+			echo '<div class="submit" style="text-align:center">';
+			echo '<input type="submit" name="outcome" value="Update">';
+			echo '</div>';						
+			echo '</form>';                        
         }
     }
 
@@ -681,8 +689,10 @@ class assmgr_ajax_table extends flexible_table {
         }
 
         $this->wrap_html_start();
-        // Start of main data table
 
+        echo '<form method="post">';
+
+        // Start of main data table
         echo '<table'.$this->make_attributes_string($this->attributes).'>';
 
     }
@@ -702,6 +712,9 @@ class assmgr_ajax_table extends flexible_table {
         $output = '';
 
         $seperator = '&nbsp;&nbsp;|&nbsp;&nbsp;';
+        
+        $output .= "</form>";  //end of update form (for update button on the bottom of the page)
+        
         $output .= '<table class="'.$this->attributes['class'].' removeborder">';
         $output .= '<tr>';
         $output .= '<td class="cell paging" colspan="'.count($this->columns).'">';
@@ -787,8 +800,7 @@ class assmgr_ajax_table extends flexible_table {
             $output .= '&nbsp;'.get_string('perpage', 'block_assmgr').'&nbsp;';
             $output .= "</p>";
             $output .= "<noscript><p><input type='submit' value='".get_string('apply', 'block_assmgr')."' /></p></noscript>";
-            $output .= "</form>";
-
+            $output .= "</form>";            
         }
 
         $output .= "
@@ -808,7 +820,7 @@ class assmgr_ajax_table extends flexible_table {
         $output .='</td>';
         $output .='</tr>';
         $output .='</table>';
-
+            
         if ($return) {
             return $output;
         }

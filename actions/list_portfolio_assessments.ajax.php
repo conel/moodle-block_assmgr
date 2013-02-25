@@ -57,7 +57,8 @@ if(!empty($course_id) && ($course = $dbc->get_course($course_id)) == false) {
 }
 
 // get the category from the course, or from the params
-$category_id = empty($course->category) ? $PARSER->optional_param('category_id', null, PARAM_INT) : $course->category;
+//$category_id = empty($course->category) ? $PARSER->optional_param('category_id', null, PARAM_INT) : $course->category;
+$category_id = (int) $_GET['category_id'];
 
 // if there is a category_id: fetch the category, or fail if the id is wrong
 if(!empty($category_id) && ($category = $dbc->get_category($category_id)) == false) {
@@ -274,7 +275,8 @@ if(!empty($categories)) {
 			</div>
 			<div class="felement fselect">
 				<select name="category_id" id="switch_category_id" onchange="document.getElementById('switch_category').submit();">
-					<option value="0"><?php echo get_string('allmyqualifications', 'block_assmgr'); ?></option>
+					<!--option value="0"><?php echo get_string('allmyqualifications', 'block_assmgr'); ?></option-->
+					<option value="0"><?php echo "All Qualifications"; ?></option>
 						<?php
 						foreach($categSelect as $direct => $categ) {
 							echo "<optgroup label='$direct'>";
@@ -297,14 +299,15 @@ if(!empty($categories)) {
 		<div class="fitem">
 			<div class="fitemtitle">
 				<label for="switch_course_id">
-					<?php echo get_string('course', 'block_assmgr'); ?>
+					<?php echo get_string('unit', 'block_assmgr'); ?>
 				</label>
 			</div>
 			<div class="felement fselect">
 				<!--input type="hidden" name="category_id" value="<?php echo $category_id; ?>" /-->
 				<!--select name="course_id" id="switch_course_id" onchange="document.getElementById('switch_course').submit();"-->
 				<select name="id" id="id" onchange="document.getElementById('switch_course').submit();">
-					<option value="0"><?php echo get_string('allmycourses', 'block_assmgr'); ?></option>
+					<!--option value="0"><?php echo get_string('allmycourses', 'block_assmgr'); ?></option-->
+					<option value="0"><?php echo "All Units"; ?></option>
 					<?php
 					foreach ($course_select as $g) {
 						if($g->id == 1) continue;										
@@ -325,17 +328,21 @@ if(!empty($categories)) {
 //groups_print_course_menu($groupcourse, $flextable->baseurl);
 
 /*
- * NO TARGETS TABLE
- * the ones are listed here in 1.9: https://vle.conel.ac.uk/admin/block.php?block=35
- *
-$rtargets = $DB->get_records('targets',null,'','id');	
-$targets = '';
+ * get targets grade form ilp
+ * http://moodle2/blocks/ilp/actions/edit_reportentry.php?user_id=7312&report_id=9
+ * http://moodle2/blocks/ilp/actions/edit_field.php?reportfield_id=36&report_id=9&plugin_id=5
+ * db:
+ * select * from mdl_block_ilp_report_field where report_id=9;
+ * select * from mdl_block_ilp_plugin where id=5;
+ * select * from mdl_block_ilp_plu_dd where reportfield_id=36;
+ * select * from mdl_block_ilp_plu_dd_ent;
+ * select * from mdl_block_ilp_plu_dd_items;
+ */
+$rtargets = $DB->get_records('block_ilp_plu_dd_items',null,'','id, value');
+$targets = "<option value='0'>not yet set</option>";
 foreach($rtargets as $target) {
-	$targets .= "<option value='".$target->id."'>".$target->name."</option>";
+	$targets .= "<option value='".$target->id."'>".$target->value."</option>";
 }
- * 
- * 
-*/
 
 if(!empty($matrix)) {
     foreach($matrix as $candidate) {
@@ -392,16 +399,16 @@ if(!empty($matrix)) {
             $data['course'.$id] = "<div class='progress_bar_cell {$highlight}'>{$cell}</div>";
         }
 
-		$qoutcome = false; //get_record('qualification_outcomes','category_id',$category_id,'candidate_id',$candidate->candidate_id);
+		$qoutcome = $DB->get_record('block_assmgr_qualification_outcomes', array('category_id'=>$category_id, 'candidate_id'=>$candidate->candidate_id));	 
 		
 		if($qoutcome==false) {
 			$qoutcome = new Object();
 			$qoutcome->total_credit = 0;
 			$qoutcome->predicted_grade = 0;						
 		}
-		
-		$trgts = ''; //$targets;
-		//$trgts = str_replace("<option value='".$qoutcome->predicted_grade."'>","<option value='".$qoutcome->predicted_grade."' selected='selected'>",$trgts);
+				
+		$trgts = $targets;
+		$trgts = str_replace("<option value='".$qoutcome->predicted_grade."'>","<option value='".$qoutcome->predicted_grade."' selected='selected'>",$trgts);
 					
 		$data['total_credit'] = "<input type='text' name='total_credit[".$candidate->candidate_id."]' value='".$qoutcome->total_credit."' style='text-align:right' />";
 		$data['predicted_grade'] = "<select name='predicted_grade[".$candidate->candidate_id."]'>".$trgts."</select>";

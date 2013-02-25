@@ -560,7 +560,7 @@ assmgr .gradetext {
 }
 
 #assmgr_assessments_container {
-	overflow-x: auto;
+	/*overflow-x: auto;*/
 }
 
 .assmgr #assmgr_assessments_container .mform {

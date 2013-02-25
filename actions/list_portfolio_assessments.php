@@ -19,7 +19,7 @@ while (($collapsed = preg_replace('|/[^/]+/\.\./|','/',$path_to_config,1)) !== $
 }
 require_once('../../../config.php');
 
-global $CFG, $USER, $PARSER, $PAGE;
+global $CFG, $USER, $PARSER, $PAGE, $DB;
 
 //include the moodle library
 require_once($CFG->dirroot.'/lib/moodlelib.php');
@@ -53,7 +53,8 @@ if(!empty($course_id) && ($course = $dbc->get_course($course_id)) == false) {
 }
 
 // get the category from the course, or from the params
-$category_id = empty($course->category) ? $PARSER->optional_param('category_id', null, PARAM_INT) : $course->category;
+//$category_id = empty($course->category) ? $PARSER->optional_param('category_id', null, PARAM_INT) : $course->category;
+$category_id = (int) $_GET['category_id'];
 
 // if there is a category_id: fetch the category, or fail if the id is wrong
 if(!empty($category_id) && ($category = $dbc->get_category($category_id)) == false) {
@@ -63,6 +64,51 @@ if(!empty($category_id) && ($category = $dbc->get_category($category_id)) == fal
 $context = (!empty($course_id)) ? get_context_instance(CONTEXT_COURSE, $course_id) : get_context_instance(CONTEXT_SYSTEM);
 
 $PAGE->set_context($context);
+
+/*
+CREATE TABLE `mdl_block_assmgr_qualification_outcomes` (
+  `id` bigint(10) unsigned NOT NULL AUTO_INCREMENT,
+  `category_id` bigint(10) unsigned DEFAULT NULL,
+  `candidate_id` bigint(10) unsigned DEFAULT NULL,
+  `assessor_id` bigint(10) unsigned DEFAULT NULL,
+  `total_credit` bigint(10) unsigned DEFAULT NULL,
+  `predicted_grade` bigint(10) unsigned DEFAULT NULL,
+  `timecreated` bigint(10) unsigned DEFAULT NULL,
+  `timemodified` bigint(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `mdl_ualifitc_cat_ix` (`category_id`),
+  KEY `mdl_ualifitc_can_ix` (`candidate_id`),
+  KEY `mdl_ualifitc_ass_ix` (`assessor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+*/
+if(isset($_POST['outcome'])) {
+	$tcrs = $_POST['total_credit']; 
+	$pdgs = $_POST['predicted_grade']; 
+	//print_object($_POST);
+	foreach($tcrs as $cid => $tcr){
+		$cid =(int) $cid;
+		$tcr = (int) $tcr;
+		$pdg = (int)$pdgs[$cid];	
+		
+		$qrecord  = new stdClass ();
+		$qrecord->category_id = $category_id;
+		$qrecord->candidate_id = $cid;
+		$qrecord->assessor_id = $USER->id;
+		$qrecord->total_credit = $tcr;
+		$qrecord->predicted_grade = $pdg;
+		$qrecord->timecreated = time();
+			
+		//$exists = $DB->record_exists('block_assmgr_qualification_outcomes', array('category_id'=>$category_id, 'candidate_id'=>$cid));	
+		$qoutcome = $DB->get_record('block_assmgr_qualification_outcomes', array('category_id'=>$category_id, 'candidate_id'=>$cid), 'id');	
+		
+		if(!empty($outcome)) {
+			$qrecord->id = $outcome->id;
+			$DB->update_record($table, $qrecord);
+		} else {			
+			$DB->insert_record('block_assmgr_qualification_outcomes', $qrecord); 							
+		}
+	}
+}
 
 // setup the navigation breadcrumbs
 $PAGE->navbar->add(get_string('blockname', 'block_assmgr'),null,'title');
