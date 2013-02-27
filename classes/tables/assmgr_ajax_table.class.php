@@ -511,6 +511,12 @@ class assmgr_ajax_table extends flexible_table {
 
             echo '</table>';
 
+			echo '<input type="hidden" name="category_id" value="'.$this->category_id.'">';
+			echo '<div class="submit" style="text-align:center">';
+			echo '<input type="submit" name="outcome" value="Update">';
+			echo '</div>';						
+			echo '</form>'; 
+			
             if($this->use_pages) {
                 $this->print_paging_bar();
             }
@@ -519,13 +525,7 @@ class assmgr_ajax_table extends flexible_table {
             // Paging bar
             if(in_array(TABLE_P_BOTTOM, $this->showdownloadbuttonsat)) {
                 echo $this->download_buttons();
-            }
-
-			echo '<input type="hidden" name="category_id" value="'.$this->category_id.'">';
-			echo '<div class="submit" style="text-align:center">';
-			echo '<input type="submit" name="outcome" value="Update">';
-			echo '</div>';						
-			echo '</form>';                        
+            }                       
         }
     }
 
@@ -846,8 +846,8 @@ class assmgr_ajax_table extends flexible_table {
             $colspan = ($this->totalcols < $this->hozsize) ? $this->totalcols : $this->hozsize;
             ?>
             <tr>
-                <th class="headerrow category catlevel1 cell removebottomborder" colspan="<?php echo count($this->columns) - $this->hozcols; ?>">&nbsp;</th>
-                <th class="headerrow category catlevel1 cell" colspan="<?php echo $colspan; ?>">
+                <!--th class="headerrow category catlevel1 cell removebottomborder" colspan="<?php echo count($this->columns) - $this->hozcols; ?>">&nbsp;</th-->
+                <th class="headerrow category catlevel1 cell" colspan="<?php echo $colspan + 1; ?>">
                     <?php
                     $hozleftdouble = ($this->currhoz == 0) ? false : $this->currhoz - $this->hozsize;
                     $hozleftdouble = ($hozleftdouble < 0) ? 0 : $hozleftdouble;

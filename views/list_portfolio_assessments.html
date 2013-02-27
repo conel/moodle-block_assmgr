@@ -12,6 +12,10 @@ $PAGE->requires->js('/blocks/assmgr/views/js/lib.js');
 // load the standard YUI style sheet
 $PAGE->requires->css_theme(new moodle_url($CFG->wwwroot.'/lib/yui/container/assets/container.css'));
 
+//exclude parent's pagelayout sheet's css which makes the page's horizontal scrollbar dissapear
+$THEME = $PAGE->theme;
+//$THEME->parents_exclude_sheets = array('base'=>array('pagelayout'));
+
 echo $OUTPUT->header();
 ?>
 <div class="assmgr yui-skin-sam">

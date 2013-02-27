@@ -84,26 +84,19 @@ CREATE TABLE `mdl_block_assmgr_qualification_outcomes` (
 if(isset($_POST['outcome'])) {
 	$tcrs = $_POST['total_credit']; 
 	$pdgs = $_POST['predicted_grade']; 
-	//print_object($_POST);
-	foreach($tcrs as $cid => $tcr){
-		$cid =(int) $cid;
-		$tcr = (int) $tcr;
-		$pdg = (int)$pdgs[$cid];	
-		
+	foreach($tcrs as $cid => $tcr){		
 		$qrecord  = new stdClass ();
 		$qrecord->category_id = $category_id;
-		$qrecord->candidate_id = $cid;
+		$qrecord->candidate_id = (int) $cid;
 		$qrecord->assessor_id = $USER->id;
-		$qrecord->total_credit = $tcr;
-		$qrecord->predicted_grade = $pdg;
-		$qrecord->timecreated = time();
-			
-		//$exists = $DB->record_exists('block_assmgr_qualification_outcomes', array('category_id'=>$category_id, 'candidate_id'=>$cid));	
-		$qoutcome = $DB->get_record('block_assmgr_qualification_outcomes', array('category_id'=>$category_id, 'candidate_id'=>$cid), 'id');	
-		
-		if(!empty($outcome)) {
-			$qrecord->id = $outcome->id;
-			$DB->update_record($table, $qrecord);
+		$qrecord->total_credit = (int) $tcr;
+		$qrecord->predicted_grade = (int)$pdgs[$cid];
+		$qrecord->timecreated = time();			
+		$outable = 'block_assmgr_qualification_outcomes';	
+		$qoutcome = $DB->get_record($outable, array('category_id'=>$category_id, 'candidate_id'=>$cid), 'id');					
+		if(!empty($qoutcome)) {
+			$qrecord->id = $qoutcome->id;
+			$DB->update_record($outable, $qrecord);
 		} else {			
 			$DB->insert_record('block_assmgr_qualification_outcomes', $qrecord); 							
 		}

@@ -59,11 +59,16 @@ if(!empty($outcomes)) {
 		
         $outcome	=	$dbc->get_outcome($outcome_id);
 		
+		//print_object($outcome);
+		
         //as the grades name is the only real link back to outcome provided by (the data returned from) grade_get_grades function we need
         //to query the grade_items table to retrieve the itemnumber of the outcome for this activity (if it exists)
         //we can then use this information to get the grade from the data grade_get_grades returns
         $outcome_grade_item		=	$dbc->get_overall_course_outcome($course_id,$outcome_id);
 
+		//print 'outcome_grade_item:';
+		//print_object($outcome_grade_item);
+		
         /*
                 if (empty($outcome_grade_item))	{
                     //we need to create the grade item should not get to this state if the sub course module has been used
@@ -99,9 +104,15 @@ if(!empty($outcomes)) {
         				
 		$record = $DB->get_record_select('grade_items', "courseid = '$course_id' AND itemnumber = '$outcome_id'", null, 'id');			
 		
+		//print_object($record);
+		
 		if(!empty($record)) {
-			if($grade == 0) $grade = null;
-			$DB->set_field('grade_grades', 'finalgrade', $grade, array('itemid' => $record->id, 'userid' => $candidate_id));
+			if($grade == 0) $grade = null;		
+			if($DB->record_exists('grade_grades', array('itemid' => $record->id, 'userid' => $candidate_id))) {			 
+				$DB->set_field('grade_grades', 'finalgrade', $grade, array('itemid' => $record->id, 'userid' => $candidate_id));
+			} else {
+				$DB->insert_record('grade_grades', (object) array('itemid' => $record->id, 'userid' => $candidate_id, 'finalgrade' => $grade));
+			}
 		} else {
 			assmgr_grade_update('outcome',$course_id,"outcome",NULL,$outcome_id,NULL,$outcomegrade,array('itemname'=>$outcome->shortname));
 		}
