@@ -371,9 +371,12 @@ if(!empty($matrix)) {
                 $highlight = null;
             } else {
                 // get the progress bar
-                $progbar = $progress->get_unit_progress($candidate->candidate_id, $courseobj->id, $access_isassessor, 'small', $candidate->$achieved);
 
-                // get the portfolio grade
+                //print "user: ".$candidate->candidate_id.", course id: ".$courseobj->id.", access_isassessor: ".$access_isassessor.", achieved: ".$candidate->achieved."<br>";
+                                
+                $progbar = $progress->get_unit_progress($candidate->candidate_id, $courseobj->id, $access_isassessor, 'small'); //, $candidate->achieved);
+
+                // get the portfolio grade                                
                 $portgrade = $dbc->get_portfolio_grade($courseobj->id, $candidate->candidate_id);
                 
                 $finalgrade = !empty($portgrade->grade) ? $portgrade->str_grade : '';

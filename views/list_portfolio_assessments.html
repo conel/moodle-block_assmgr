@@ -1,10 +1,13 @@
 <?php
 // include standard libraries
+/*
 $PAGE->requires->js('/lib/yui/2.9.0/build/yahoo/yahoo-min.js');
 $PAGE->requires->js('/lib/yui/2.9.0/build/event/event-min.js');
 $PAGE->requires->js('/lib/yui/2.9.0/build/dom/dom-min.js');
 $PAGE->requires->js('/lib/yui/2.9.0/build/animation/animation-min.js');
 $PAGE->requires->js('/lib/yui/2.9.0/build/container/container.js');
+$PAGE->requires->js('/lib/yui/2.9.0/build/utilities/utilities.js');
+*/
 
 // include the assmgr custom library
 $PAGE->requires->js('/blocks/assmgr/views/js/lib.js');
@@ -18,6 +21,16 @@ $THEME = $PAGE->theme;
 
 echo $OUTPUT->header();
 ?>
+
+<script type="text/javascript" src="http://moodle2/lib/yui/2.9.0/build/yahoo/yahoo-min.js"></script>
+<script type="text/javascript" src="http://moodle2/lib/yui/2.9.0/build/event/event-min.js"></script>
+<script type="text/javascript" src="http://moodle2/lib/yui/2.9.0/build/dom/dom-min.js"></script>
+<script type="text/javascript" src="http://moodle2/lib/yui/2.9.0/build/animation/animation-min.js"></script>
+<script type="text/javascript" src="http://moodle2/lib/yui/2.9.0/build/container/container.js"></script>
+<script type="text/javascript" src="http://moodle2/lib/yui/2.9.0/build/utilities/utilities.js"></script>
+<script type="text/javascript" src="http://moodle2/blocks/assmgr/views/js/lib.js"></script>
+<script type="text/javascript" src="http://moodle2/theme/javascript.php?theme=conel&amp;rev=-1&amp;type=footer"></script>
+
 <div class="assmgr yui-skin-sam">
     <?php
     echo $OUTPUT->heading(get_string('listportfolios', 'block_assmgr'));
