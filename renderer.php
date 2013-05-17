@@ -37,7 +37,8 @@ class block_assmgr_renderer extends plugin_renderer_base {
 		$activities 			=		$courseactivities->get_course_activities();
 		$outcomes 				=		$courseactivities->get_course_outcomes();
 		
-		if (!empty($activities)) {
+		// 29/04/13 show header even if there is no activity as in 1.9 (requested by scott) 
+		//if (!empty($activities)) {
 						
 			$out	=	html_writer::start_tag('div',array('id'=>'assessdiv','class'=>'fixedtableclass'));
 			
@@ -133,11 +134,14 @@ class block_assmgr_renderer extends plugin_renderer_base {
 			}
 			
 			$out	.=		html_writer::end_tag('div');
+
+		/*  29/04/13 show header even if there is no activity as in 1.9 (requested by scott) 
 		}	else {
 			
 			$out	=	html_writer::start_tag('div',array('id'=>'nothingtodisplay'));
 			$out	.=	get_string('nothingtodisplay');
 			$out	.=		html_writer::end_tag('div');
+		*/
 						
 			/*
 			$jsmodule = array(
@@ -149,7 +153,7 @@ class block_assmgr_renderer extends plugin_renderer_base {
 			$PAGE->requires->js_init_call('M.assmgr.view_submissions.hidecolumns()', null, true, $jsmodule);
 			//$PAGE->requires->js_init_call('M.assmgr.view_submissions.init()', null, true, $jsmodule);
 			*/
-		}
+		//}  29/04/13 show header even if there is no activity as in 1.9 (requested by scott) 
 		
 		return $out;
 	}
